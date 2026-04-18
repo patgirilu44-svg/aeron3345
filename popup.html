@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PriceScope</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 300px;
+      background: #1A1A2E;
+      color: #E8E8F0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1A1A2E 0%, #16213E 100%);
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid rgba(255,107,53,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo { font-size: 24px; }
+
+    .brand h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #FF6B35;
+      letter-spacing: 0.03em;
+    }
+    .brand p {
+      font-size: 11px;
+      color: #8888AA;
+      margin-top: 1px;
+    }
+
+    .status {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,107,53,0.1);
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(100, 255, 218, 0.08);
+      border: 1px solid rgba(100, 255, 218, 0.2);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: #64FFDA;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #64FFDA;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .instructions {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,107,53,0.1);
+    }
+
+    .instructions h2 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #8888AA;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+
+    .step {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(255,107,53,0.15);
+      border: 1.5px solid rgba(255,107,53,0.4);
+      color: #FF6B35;
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step p {
+      font-size: 12.5px;
+      color: #C0C0D8;
+      line-height: 1.5;
+    }
+
+    .step strong { color: #FF6B35; }
+
+    .footer {
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer span {
+      font-size: 11px;
+      color: #555570;
+    }
+
+    .footer a {
+      font-size: 11px;
+      color: #FF6B35;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">📊</div>
+    <div class="brand">
+      <h1>PriceScope</h1>
+      <p>Amazon Price History Tracker</p>
+    </div>
+  </div>
+
+  <div class="status">
+    <div class="status-chip">
+      <div class="dot"></div>
+      Extension Active
+    </div>
+  </div>
+
+  <div class="instructions">
+    <h2>How to use</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <p>Go to any <strong>Amazon product page</strong></p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <p>Click the <strong>📊 Price History</strong> button in the bottom-right corner</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <p>See the <strong>90-day price trend</strong> instantly. Never overpay again.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>v1.0.0 · Free</span>
+    <a href="https://keepa.com" target="_blank">Powered by Keepa</a>
+  </div>
+</body>
+</html>
