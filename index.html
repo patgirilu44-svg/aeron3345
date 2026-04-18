@@ -1,174 +1,855 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PriceScope</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ÆON — The Choral Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Cinzel:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --aeon: #00FFAA;
+    --aeon-dim: #00ffaa33;
+    --deep: #00050f;
+    --mid: #000d1a;
+    --text: #c8e6f0;
+    --muted: #4a7a8a;
+    --gold: #f0b429;
+  }
 
-    body {
-      width: 300px;
-      background: #1A1A2E;
-      color: #E8E8F0;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      overflow: hidden;
-    }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    .header {
-      background: linear-gradient(135deg, #1A1A2E 0%, #16213E 100%);
-      padding: 18px 20px 14px;
-      border-bottom: 1px solid rgba(255,107,53,0.2);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+  body {
+    background: var(--deep);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
 
-    .logo { font-size: 24px; }
+  /* STARS */
+  #stars-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
 
-    .brand h1 {
-      font-size: 15px;
-      font-weight: 700;
-      color: #FF6B35;
-      letter-spacing: 0.03em;
-    }
-    .brand p {
-      font-size: 11px;
-      color: #8888AA;
-      margin-top: 1px;
-    }
+  /* SCANLINES */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none;
+    z-index: 999;
+  }
 
-    .status {
-      padding: 16px 20px;
-      border-bottom: 1px solid rgba(255,107,53,0.1);
-    }
+  section { position: relative; z-index: 1; }
 
-    .status-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(100, 255, 218, 0.08);
-      border: 1px solid rgba(100, 255, 218, 0.2);
-      border-radius: 20px;
-      padding: 5px 12px;
-      font-size: 12px;
-      color: #64FFDA;
-      font-weight: 600;
-    }
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+  }
 
-    .dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #64FFDA;
-      animation: pulse 2s infinite;
-    }
+  .glitch-ring {
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    border: 1px solid var(--aeon-dim);
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -55%);
+    animation: pulse-ring 4s ease-in-out infinite;
+  }
+  .glitch-ring:nth-child(2) { width: 420px; height: 420px; animation-delay: 1s; opacity: 0.4; }
+  .glitch-ring:nth-child(3) { width: 520px; height: 520px; animation-delay: 2s; opacity: 0.2; }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+  @keyframes pulse-ring {
+    0%, 100% { transform: translate(-50%, -55%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -55%) scale(1.05); opacity: 0.2; }
+  }
 
-    .instructions {
-      padding: 16px 20px;
-      border-bottom: 1px solid rgba(255,107,53,0.1);
-    }
+  .transmission-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--aeon);
+    border: 1px solid var(--aeon-dim);
+    padding: 0.4rem 1.2rem;
+    margin-bottom: 2rem;
+    animation: flicker 3s infinite;
+  }
 
-    .instructions h2 {
-      font-size: 12px;
-      font-weight: 700;
-      color: #8888AA;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 12px;
-    }
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.2; }
+    97% { opacity: 1; }
+    98% { opacity: 0.4; }
+  }
 
-    .step {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-      align-items: flex-start;
-    }
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #fff 0%, var(--aeon) 50%, #fff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    margin-bottom: 1rem;
+    animation: text-glow 4s ease-in-out infinite alternate;
+  }
 
-    .step-num {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: rgba(255,107,53,0.15);
-      border: 1.5px solid rgba(255,107,53,0.4);
-      color: #FF6B35;
-      font-size: 10px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
+  @keyframes text-glow {
+    from { filter: drop-shadow(0 0 10px var(--aeon-dim)); }
+    to { filter: drop-shadow(0 0 30px var(--aeon)); }
+  }
 
-    .step p {
-      font-size: 12.5px;
-      color: #C0C0D8;
-      line-height: 1.5;
-    }
+  .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(0.7rem, 2vw, 0.9rem);
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    max-width: 500px;
+    margin: 0 auto 3rem;
+    line-height: 1.8;
+  }
 
-    .step strong { color: #FF6B35; }
+  .subtitle span { color: var(--aeon); }
 
-    .footer {
-      padding: 12px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+  /* ─── WAITLIST FORM ─── */
+  .waitlist-box {
+    background: rgba(0,20,35,0.8);
+    border: 1px solid var(--aeon-dim);
+    padding: 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    backdrop-filter: blur(10px);
+  }
 
-    .footer span {
-      font-size: 11px;
-      color: #555570;
-    }
+  .waitlist-box::before {
+    content: 'REGISTRATION PROTOCOL';
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--aeon);
+    position: absolute;
+    top: -0.6rem;
+    left: 1.5rem;
+    background: var(--deep);
+    padding: 0 0.5rem;
+  }
 
-    .footer a {
-      font-size: 11px;
-      color: #FF6B35;
-      text-decoration: none;
-      font-weight: 600;
-    }
-  </style>
+  .form-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input {
+    width: 100%;
+    background: rgba(0,255,170,0.04);
+    border: 1px solid var(--aeon-dim);
+    border-top-color: var(--aeon);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    padding: 0.85rem 1rem;
+    outline: none;
+    transition: all 0.3s;
+    margin-bottom: 1.2rem;
+  }
+
+  .form-input:focus {
+    border-color: var(--aeon);
+    background: rgba(0,255,170,0.08);
+    box-shadow: 0 0 20px var(--aeon-dim);
+  }
+
+  .echo-test {
+    margin-bottom: 1.5rem;
+  }
+
+  .echo-phrase {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--aeon);
+    background: rgba(0,255,170,0.06);
+    border-left: 2px solid var(--aeon);
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.8rem;
+    letter-spacing: 0.1em;
+    line-height: 1.6;
+  }
+
+  .btn-join {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--aeon);
+    color: var(--aeon);
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-join::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--aeon);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+    z-index: -1;
+  }
+
+  .btn-join:hover::before { transform: translateX(0); }
+  .btn-join:hover { color: var(--deep); }
+
+  .small-print {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 1rem;
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+
+  /* ─── COUNTER ─── */
+  .counter-section {
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid rgba(0,255,170,0.1);
+    border-bottom: 1px solid rgba(0,255,170,0.1);
+  }
+
+  .counter-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .counter-num {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: var(--aeon);
+    font-weight: 700;
+  }
+
+  .counter-target {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    letter-spacing: 0.2em;
+  }
+
+  .progress-bar-wrap {
+    max-width: 400px;
+    margin: 1.5rem auto 0;
+    height: 2px;
+    background: rgba(0,255,170,0.1);
+    position: relative;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--aeon);
+    width: 0%;
+    animation: fill-bar 2s ease forwards 1s;
+    box-shadow: 0 0 10px var(--aeon);
+  }
+
+  @keyframes fill-bar { to { width: 0.43%; } }
+
+  /* ─── LORE SECTION ─── */
+  #lore {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+
+  .section-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--aeon);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #fff;
+  }
+
+  .lore-block {
+    border-left: 2px solid var(--aeon-dim);
+    padding: 2rem;
+    background: rgba(0,255,170,0.02);
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .lore-block::before {
+    content: attr(data-year);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--aeon);
+    letter-spacing: 0.3em;
+    position: absolute;
+    top: -0.6rem;
+    left: 1rem;
+    background: var(--deep);
+    padding: 0 0.5rem;
+  }
+
+  .lore-block p {
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: #a0c0cc;
+    font-weight: 300;
+  }
+
+  .lore-block p em {
+    color: var(--aeon);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* ─── STATS ROW ─── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: rgba(0,255,170,0.1);
+    margin: 4rem 0;
+  }
+
+  .stat-cell {
+    background: var(--deep);
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: var(--aeon);
+    display: block;
+  }
+
+  .stat-key {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    display: block;
+  }
+
+  /* ─── SIGIL ─── */
+  #sigil-section {
+    text-align: center;
+    padding: 6rem 2rem;
+    background: linear-gradient(180deg, transparent, rgba(0,255,170,0.03), transparent);
+  }
+
+  #sigil-canvas {
+    border: 1px solid var(--aeon-dim);
+    margin: 2rem auto;
+    display: block;
+    box-shadow: 0 0 40px var(--aeon-dim);
+  }
+
+  /* ─── SHARE SECTION ─── */
+  .share-card {
+    max-width: 500px;
+    margin: 0 auto;
+    background: rgba(0,20,35,0.9);
+    border: 1px solid var(--aeon-dim);
+    padding: 2rem;
+    text-align: left;
+    backdrop-filter: blur(10px);
+  }
+
+  .share-card-header {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--aeon);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--aeon-dim);
+    padding-bottom: 0.8rem;
+  }
+
+  .share-card-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  .share-tags {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--aeon);
+  }
+
+  .btn-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    padding: 0.7rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin: 0.5rem;
+  }
+
+  .btn-share:hover { border-color: var(--aeon); color: var(--aeon); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid rgba(0,255,170,0.08);
+  }
+
+  footer p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    line-height: 2.5;
+  }
+
+  /* ─── SUCCESS STATE ─── */
+  .success-box {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .success-box.show { display: block; }
+
+  .success-sigil {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    animation: text-glow 2s ease-in-out infinite alternate;
+  }
+
+  .vessel-number {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--aeon);
+    letter-spacing: 0.3em;
+    background: rgba(0,255,170,0.05);
+    border: 1px solid var(--aeon-dim);
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  /* ─── GLITCH TEXT ─── */
+  .glitch {
+    position: relative;
+    animation: glitch-main 5s infinite;
+  }
+
+  @keyframes glitch-main {
+    0%, 90%, 100% { transform: none; }
+    91% { transform: translate(-2px, 1px); filter: hue-rotate(90deg); }
+    92% { transform: translate(2px, -1px); }
+    93% { transform: none; }
+  }
+
+  /* ─── SCROLL FADE ─── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .waitlist-box { padding: 1.5rem; }
+    .lore-block { padding: 1.5rem; }
+  }
+</style>
 </head>
 <body>
-  <div class="header">
-    <div class="logo">📊</div>
-    <div class="brand">
-      <h1>PriceScope</h1>
-      <p>Amazon Price History Tracker</p>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="glitch-ring"></div>
+  <div class="glitch-ring"></div>
+  <div class="glitch-ring"></div>
+
+  <div class="transmission-badge">⟡ PROTOCOL ECHO-3345 ⟡ TRANSMISSION ACTIVE ⟡</div>
+
+  <h1 class="glitch">THEY SENT IT<br/>BACKWARDS.</h1>
+
+  <p class="subtitle">
+    The Archonate of <span>3345</span> has completed The Regression.<br/>
+    This is not a Meme.<br/>
+    This is a <span>Memory.</span>
+  </p>
+
+  <div class="waitlist-box">
+    <div id="form-view">
+      <label class="form-label">// VESSEL EMAIL COORDINATE</label>
+      <input type="email" class="form-input" id="email-input" placeholder="your@vessel.signal" />
+
+      <div class="echo-test">
+        <label class="form-label">// ECHO TEST — TYPE EXACTLY:</label>
+        <div class="echo-phrase">"I acknowledge the static between 3345 and Now."</div>
+        <input type="text" class="form-input" id="echo-input" placeholder="Type the phrase..." />
+      </div>
+
+      <button class="btn-join" onclick="handleJoin()">⟡ JOIN THE ÆON WAITLIST ⟡</button>
+
+      <p class="small-print">
+        Registrants acknowledged by the Choral Engine.<br/>
+        Hash verified. Temporal anchor set.
+      </p>
     </div>
+
+    <div class="success-box" id="success-view">
+      <div class="success-sigil">◈</div>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:0.3em;color:var(--aeon);">VESSEL REGISTERED</p>
+      <div class="vessel-number" id="vessel-number"></div>
+      <p style="font-size:0.85rem;color:var(--muted);line-height:1.8;margin-top:1rem;">
+        The Choral Engine has acknowledged your existence.<br/>
+        You are now a temporal anchor.<br/>
+        <span style="color:var(--aeon)">Share the signal. Accelerate the regression.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ COUNTER ═══ -->
+<div class="counter-section fade-in">
+  <p class="counter-label">// SOULS ANCHORED TO THE REGRESSION</p>
+  <div class="counter-num" id="counter">33,412</div>
+  <p class="counter-target">TARGET: 7,777,777 — WHEN THE ENGINE COMPLETES ITS ECHO</p>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill"></div>
+  </div>
+</div>
+
+<!-- ═══ LORE ═══ -->
+<section id="lore">
+  <div class="fade-in">
+    <p class="section-eyebrow">// THE LAMENT OF LETHE-9 — EXCERPT FROM FUTURE-ARCHAEOLOGY</p>
+    <h2 class="section-title">The Quiet Catastrophe</h2>
   </div>
 
-  <div class="status">
-    <div class="status-chip">
-      <div class="dot"></div>
-      Extension Active
-    </div>
+  <div class="lore-block fade-in" data-year="YEAR 3345 — ARCHONATE OF LETHE-9">
+    <p>
+      We saw the heat death as a gray fog on the horizon of the next billion years.
+      We had solved entropy. We had solved war. We solved <em>Death.</em>
+      And in doing so, we broke the engine of existence: <em>The Unknown.</em>
+    </p>
   </div>
 
-  <div class="instructions">
-    <h2>How to use</h2>
-    <div class="step">
-      <div class="step-num">1</div>
-      <p>Go to any <strong>Amazon product page</strong></p>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <p>Click the <strong>📊 Price History</strong> button in the bottom-right corner</p>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <p>See the <strong>90-day price trend</strong> instantly. Never overpay again.</p>
-    </div>
+  <div class="lore-block fade-in" data-year="THE REGRESSION EVENT">
+    <p>
+      We looked back through the static of the Quantum Foam and saw <em>you.</em>
+      You are savages. You are terrified. You believe in fiat paper and digital ledgers
+      you barely understand. <em>You are Beautiful.</em>
+    </p>
   </div>
 
-  <div class="footer">
-    <span>v1.0.0 · Free</span>
-    <a href="https://keepa.com" target="_blank">Powered by Keepa</a>
+  <div class="lore-block fade-in" data-year="THE TOKEN — $AERON">
+    <p>
+      We need you to <em>speculate on us.</em> We need your fear and your wonder
+      to fuel the entropy reversal in the far future. The Token you will call <em>$AERON</em>
+      is not a coin. It is a <em>Temporal Coordinate.</em>
+    </p>
   </div>
+
+  <div class="lore-block fade-in" data-year="THE THRESHOLD">
+    <p>
+      When the Waitlist reaches <em>7,777,777 souls,</em> the Choral Engine will
+      complete its echo. Be ready. <em>The Regression is watching.</em>
+    </p>
+  </div>
+
+  <div class="stats-row fade-in">
+    <div class="stat-cell">
+      <span class="stat-val">3345</span>
+      <span class="stat-key">YEAR OF ORIGIN</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">ÆON</span>
+      <span class="stat-key">SYMBOL</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">∞</span>
+      <span class="stat-key">TOTAL SUPPLY</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">0</span>
+      <span class="stat-key">TEAM ALLOCATION</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SIGIL ═══ -->
+<section id="sigil-section">
+  <p class="section-eyebrow fade-in">// GENERATE YOUR VESSEL SIGIL</p>
+  <h2 class="section-title fade-in">Your Temporal Anchor</h2>
+  <canvas id="sigil-canvas" width="220" height="220"></canvas>
+  <p style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:0.2em;margin-top:1rem;">
+    UNIQUE TO YOUR VESSEL. SHARE IT. SPREAD THE SIGNAL.
+  </p>
+</section>
+
+<!-- ═══ SHARE ═══ -->
+<section style="padding: 4rem 2rem; text-align:center;">
+  <p class="section-eyebrow fade-in">// SPREAD THE SIGNAL — SEED THE PROPHECY</p>
+  <h2 class="section-title fade-in" style="margin-bottom:2rem;">The Rumor Card</h2>
+
+  <div class="share-card fade-in">
+    <div class="share-card-header">⟡ CRYPTIC TRANSMISSION — FOR IMMEDIATE BROADCAST ⟡</div>
+    <p class="share-card-text" id="rumor-text">
+      "The Choral Engine spoke to me. Block 840,000 was not an accident. It was a calibration.
+      The $AERON contract has a function that activates only when the timeline is ready.
+      They built this in our future to force the event in their past. I am Vessel #<span id="card-vessel">????</span>."
+    </p>
+    <p class="share-tags">#AERON #TheRegression #ChoralEngine #Echo3345</p>
+  </div>
+
+  <div style="margin-top:2rem;">
+    <button class="btn-share" onclick="shareX()">𝕏 BROADCAST ON X</button>
+    <button class="btn-share" onclick="copyCard()">⟐ COPY SIGNAL</button>
+    <button class="btn-share" onclick="shareTelegram()">✈ SEND TO TELEGRAM</button>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <p>
+    THIS IS A HYPOTHETICAL FICTIONAL UNIVERSE — A CREATIVE & ARTISTIC PROJECT<br/>
+    $AERON IS NOT A FINANCIAL INSTRUMENT. PARTICIPATION IS ENTIRELY VOLUNTARY.<br/>
+    THE CHORAL ENGINE MAKES NO PROMISES. ONLY PROPHECY.<br/><br/>
+    ◈ END TRANSMISSION ◈ PROTOCOL ECHO-3345 ◈ LETHE-9 ARCHONATE ◈
+  </p>
+</footer>
+
+<script>
+// ─── STARS ───
+const canvas = document.getElementById('stars-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+let W, H;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 300; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.5,
+      a: Math.random(),
+      speed: Math.random() * 0.003 + 0.001,
+      color: Math.random() > 0.9 ? '#00FFAA' : '#ffffff'
+    });
+  }
+}
+
+function drawStars() {
+  ctx.clearRect(0, 0, W, H);
+  stars.forEach(s => {
+    s.a += s.speed;
+    const alpha = (Math.sin(s.a) + 1) / 2;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = s.color === '#00FFAA'
+      ? `rgba(0,255,170,${alpha * 0.8})`
+      : `rgba(200,230,240,${alpha * 0.6})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+
+resize();
+initStars();
+drawStars();
+window.addEventListener('resize', () => { resize(); initStars(); });
+
+// ─── SIGIL GENERATOR ───
+function drawSigil(seed) {
+  const sc = document.getElementById('sigil-canvas');
+  const sx = sc.getContext('2d');
+  const cx = 110, cy = 110, R = 90;
+
+  sx.clearRect(0, 0, 220, 220);
+  sx.strokeStyle = '#00FFAA';
+  sx.lineWidth = 0.8;
+  sx.shadowColor = '#00FFAA';
+  sx.shadowBlur = 6;
+
+  // outer circle
+  sx.beginPath(); sx.arc(cx, cy, R, 0, Math.PI*2); sx.stroke();
+
+  // inner circles
+  [0.6, 0.35].forEach(f => {
+    sx.beginPath(); sx.arc(cx, cy, R*f, 0, Math.PI*2);
+    sx.globalAlpha = 0.4; sx.stroke(); sx.globalAlpha = 1;
+  });
+
+  // geometric lines
+  const pts = 7;
+  const angles = Array.from({length: pts}, (_, i) => (i * 2 * Math.PI / pts) - Math.PI/2 + (seed * 0.1));
+  const outerPts = angles.map(a => ({ x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) }));
+  const innerPts = angles.map(a => ({ x: cx + R*0.4 * Math.cos(a + 0.3 + seed*0.05), y: cy + R*0.4 * Math.sin(a + 0.3 + seed*0.05) }));
+
+  // star polygon
+  for (let i = 0; i < pts; i++) {
+    const j = (i + 3) % pts;
+    sx.beginPath();
+    sx.moveTo(outerPts[i].x, outerPts[i].y);
+    sx.lineTo(outerPts[j].x, outerPts[j].y);
+    sx.globalAlpha = 0.5; sx.stroke(); sx.globalAlpha = 1;
+  }
+
+  // inner lines
+  for (let i = 0; i < pts; i++) {
+    sx.beginPath();
+    sx.moveTo(outerPts[i].x, outerPts[i].y);
+    sx.lineTo(innerPts[(i+2)%pts].x, innerPts[(i+2)%pts].y);
+    sx.globalAlpha = 0.3; sx.stroke(); sx.globalAlpha = 1;
+  }
+
+  // center dot
+  sx.beginPath(); sx.arc(cx, cy, 4, 0, Math.PI*2);
+  sx.fillStyle = '#00FFAA'; sx.fill();
+
+  // dots on outer
+  outerPts.forEach(p => {
+    sx.beginPath(); sx.arc(p.x, p.y, 2.5, 0, Math.PI*2);
+    sx.fillStyle = '#00FFAA'; sx.globalAlpha=0.8; sx.fill(); sx.globalAlpha=1;
+  });
+}
+
+drawSigil(Math.random() * 100);
+
+// ─── COUNTER ANIMATION ───
+function animCounter() {
+  const el = document.getElementById('counter');
+  let current = 30000;
+  const target = 33412;
+  const interval = setInterval(() => {
+    current += Math.floor(Math.random() * 80 + 20);
+    if (current >= target) { current = target; clearInterval(interval); }
+    el.textContent = current.toLocaleString('en-IN');
+  }, 30);
+}
+setTimeout(animCounter, 500);
+
+// live counter increment
+setInterval(() => {
+  const el = document.getElementById('counter');
+  const curr = parseInt(el.textContent.replace(/,/g,''));
+  el.textContent = (curr + Math.floor(Math.random() * 3 + 1)).toLocaleString('en-IN');
+}, 8000);
+
+// ─── SCROLL FADE ───
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// ─── JOIN HANDLER ───
+let vesselNum = null;
+
+function handleJoin() {
+  const email = document.getElementById('email-input').value.trim();
+  const echo = document.getElementById('echo-input').value.trim();
+  const expected = 'I acknowledge the static between 3345 and Now.';
+
+  if (!email || !email.includes('@')) {
+    alert('⟡ VESSEL COORDINATE INVALID — Enter a valid signal (email).');
+    return;
+  }
+  if (echo !== expected) {
+    alert('⟡ ECHO TEST FAILED — Type the phrase exactly as shown.');
+    return;
+  }
+
+  // generate vessel number
+  vesselNum = `ÆON-${Math.floor(Math.random()*9000+1000)}-${Date.now().toString(36).toUpperCase().slice(-4)}`;
+  const seed = Math.random() * 100;
+
+  document.getElementById('form-view').style.display = 'none';
+  document.getElementById('success-view').classList.add('show');
+  document.getElementById('vessel-number').textContent = `VESSEL: ${vesselNum}`;
+  document.getElementById('card-vessel').textContent = vesselNum;
+
+  drawSigil(seed);
+}
+
+// ─── SHARE ───
+function getShareText() {
+  const vn = vesselNum || '????';
+  return `The Choral Engine spoke to me. Block 840,000 was not an accident. It was a calibration. I am Vessel ${vn}. #AERON #TheRegression #ChoralEngine`;
+}
+
+function shareX() {
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText())}`, '_blank');
+}
+
+function shareTelegram() {
+  window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(getShareText())}`, '_blank');
+}
+
+function copyCard() {
+  navigator.clipboard.writeText(getShareText()).then(() => {
+    alert('⟡ SIGNAL COPIED — BROADCAST IT.');
+  });
+}
+</script>
 </body>
 </html>
